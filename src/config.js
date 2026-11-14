@@ -1,0 +1,16 @@
+export const CONFIG = Object.freeze({
+    toolTitle: 'Nucleic Acid Mass and Copies',
+    toolId: 'C13',
+    productLine: 'Ligant Bench Tools',
+    publisher: 'Ligant',
+    legalEntity: 'Ligant AI Incorporated',
+    version: '1.0.1',
+    slug: 'nucleic-acid-mass-and-copies',
+    publicBase: 'https://benchtools.ligant.ai/',
+    repositoryUrl: 'https://github.com/Ligant-AI/C13-Nucleic-Acid-Mass-and-Copies',
+    doi: null,
+    citationAuthor: 'Modi, A.B.',
+    citationYear: '2026',
+    tagline: 'Copy number from a mass, a concentration and volume, an A260 reading or an amount in moles of dsDNA, ssDNA or ssRNA, and mass or moles from copies, in your browser.',
+    disclaimer: 'Research use only. Not qualified for GxP decision-making.',
+});

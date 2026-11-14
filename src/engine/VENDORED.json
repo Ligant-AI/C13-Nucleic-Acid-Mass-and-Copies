@@ -1,0 +1,12 @@
+{
+  "repository": "bench-engines",
+  "commit": "230e20a92493320e4f6d0fca9369927eb23d3092",
+  "note": "Read-only copies of git cat-file blob 230e20a92493320e4f6d0fca9369927eb23d3092:<from>, byte for byte, placed by the main session (KAITO-D68, KAITO-D73; CIPHER-2026-11-14-69 form E1; CIPHER-2026-11-14-66). Never edit; a re-vendor is a new placement round.",
+  "files": [
+    { "from": "src/e10/conversions.js", "to": "src/engine/e10/conversions.js", "blob": "db3941fda20c4bc826003e6be7a7282e951fe54e" },
+    { "from": "src/e10/units.js", "to": "src/engine/e10/units.js", "blob": "025fd6c3bd4044a67e400b63ce8057a35ea07452" },
+    { "from": "src/e10/index.js", "to": "src/engine/e10/index.js", "blob": "9a6f04f67a62f87d01daaf8fbe016d86c0e42e57" },
+    { "from": "src/core.js", "to": "src/engine/core.js", "blob": "e782637d153a9cafc6e713d720d24e7957dc20eb" },
+    { "from": "src/version.js", "to": "src/engine/version.js", "blob": "e8fbb3113248ccc3f7035fc1022af5b53b6c532b" }
+  ]
+}

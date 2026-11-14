@@ -1,0 +1,22 @@
+{
+  "name": "c13-nucleic-acid-mass-and-copies",
+  "version": "1.0.1",
+  "private": true,
+  "description": "Copy number from a mass, a concentration and volume, an A260 reading or an amount in moles of dsDNA, ssDNA or ssRNA, and mass or moles from copies, in your browser.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5183",
+    "build": "vite build",
+    "preview": "vite preview --port 5183"
+  },
+  "dependencies": {
+    "@ligant/bench-chrome": "file:vendor/ligant-bench-chrome-1.10.0.tgz"
+  },
+  "devDependencies": {
+    "vite": "^8.3.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

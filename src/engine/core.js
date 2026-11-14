@@ -1,0 +1,178 @@
+import { ENGINE_VERSION } from './version.js';
+const PLAIN = /^[+-]?(\d+\.?\d*|\.\d+)$/;
+const MODULE_VERSIONS = new Map();
+export function registerModule(module, moduleVersion) {
+    MODULE_VERSIONS.set(module, moduleVersion);
+}
+export function engineBlock(module) {
+    return { package: '@ligant/bench-engines', version: ENGINE_VERSION, module, moduleVersion: MODULE_VERSIONS.get(module) };
+}
+function bgcd(a, b) {
+    a = a < 0n ? -a : a;
+    b = b < 0n ? -b : b;
+    while (b)
+        [a, b] = [b, a % b];
+    return a;
+}
+export function rat(n, d = 1n) {
+    if (d < 0n) {
+        n = -n;
+        d = -d;
+    }
+    const g = bgcd(n, d) || 1n;
+    return { n: n / g, d: d / g };
+}
+export const add = (a, b) => rat(a.n * b.d + b.n * a.d, a.d * b.d);
+export const sub = (a, b) => rat(a.n * b.d - b.n * a.d, a.d * b.d);
+export const mul = (a, b) => rat(a.n * b.n, a.d * b.d);
+export const div = (a, b) => rat(a.n * b.d, a.d * b.n);
+export const cmp = (a, b) => { const x = a.n * b.d, y = b.n * a.d; return x < y ? -1 : x > y ? 1 : 0; };
+export const R = (n) => rat(BigInt(n));
+export const isInt = (a) => a.d === 1n;
+function fromPlain(s) {
+    let sign = 1n;
+    if (s[0] === '+' || s[0] === '-') {
+        if (s[0] === '-')
+            sign = -1n;
+        s = s.slice(1);
+    }
+    const [i, f = ''] = s.split('.');
+    return rat(sign * BigInt((i || '0') + f), 10n ** BigInt(f.length));
+}
+function fromNumber(x) {
+    const m = /^(-?)(\d+)(?:\.(\d+))?(?:e([+-]\d+))?$/.exec(String(x));
+    if (!m)
+        return null;
+    const frac = m[3] || '';
+    let n = BigInt(m[2] + frac) * (m[1] ? -1n : 1n);
+    let e = Number(m[4] || 0) - frac.length;
+    return e >= 0 ? rat(n * 10n ** BigInt(e)) : rat(n, 10n ** BigInt(-e));
+}
+export const isBlank = (v) => v === null || v === undefined || (typeof v === 'string' && v.trim() === '');
+export function parse(v) {
+    if (typeof v === 'number')
+        return Number.isFinite(v) ? fromNumber(v) : null;
+    if (typeof v === 'bigint')
+        return rat(v);
+    if (typeof v !== 'string')
+        return null;
+    const s = v.trim();
+    return PLAIN.test(s) ? fromPlain(s) : null;
+}
+function binaryExact(r) {
+    if ((r.d & (r.d - 1n)) !== 0n)
+        return false;
+    let t = r.n < 0n ? -r.n : r.n;
+    if (t.toString(2).length > 1000 || r.d.toString(2).length > 1000)
+        return false;
+    while ((t & 1n) === 0n)
+        t >>= 1n;
+    return t.toString(2).length <= 53;
+}
+export function toNumber(r) {
+    if (r.n === 0n)
+        return 0;
+    if (binaryExact(r))
+        return Number(r.n) / Number(r.d);
+    const neg = r.n < 0n;
+    const n = neg ? -r.n : r.n;
+    const k = 40 - (n.toString().length - r.d.toString().length);
+    const q = (k >= 0 ? (n * 10n ** BigInt(k)) / r.d : n / (r.d * 10n ** BigInt(-k))).toString();
+    let body;
+    if (k <= 0)
+        body = q + '0'.repeat(-k);
+    else {
+        const s = q.padStart(k + 1, '0');
+        body = `${s.slice(0, s.length - k)}.${s.slice(s.length - k)}`.replace(/0+$/, '').replace(/\.$/, '');
+    }
+    return neg ? `-${body}` : body;
+}
+export const incomplete = (module, missing) => ({ status: 'incomplete', missing, engine: engineBlock(module) });
+export function rejected(module, code, fields, indices = [], extra = {}) {
+    return { status: 'rejected', code, fields, indices, ...extra, engine: engineBlock(module) };
+}
+export const done = (module, body) => ({ status: 'result', ...body, engine: engineBlock(module) });
+export const missingOf = (pairs) => pairs.filter(([, v]) => isBlank(v)).map(([k]) => k);
+function roundDiv(n, d) {
+    const q = n / d;
+    return (n % d) * 2n >= d ? q + 1n : q;
+}
+function digitsLen(r) {
+    let e = r.n.toString().length - r.d.toString().length;
+    const p = (x) => (x >= 0 ? 10n ** BigInt(x) : null);
+    const ge = (ex) => (ex >= 0 ? r.n >= p(ex) * r.d : r.n * 10n ** BigInt(-ex) >= r.d);
+    while (ge(e + 1))
+        e++;
+    while (!ge(e))
+        e--;
+    return e;
+}
+function sig3Parts(a) {
+    let e = digitsLen(a);
+    const sh = 2 - e;
+    const sc = sh >= 0 ? rat(a.n * 10n ** BigInt(sh), a.d) : rat(a.n, a.d * 10n ** BigInt(-sh));
+    let m = roundDiv(sc.n, sc.d);
+    if (m >= 1000n) {
+        m = m / 10n;
+        e++;
+    }
+    return { m: m.toString(), e };
+}
+function placeDigits(m, e) {
+    const p = 2 - e;
+    if (p <= 0)
+        return m + '0'.repeat(-p);
+    const s = m.padStart(p + 1, '0');
+    return `${s.slice(0, s.length - p)}.${s.slice(s.length - p)}`;
+}
+function fixed(a, places) {
+    const sc = rat(a.n * 10n ** BigInt(places), a.d);
+    const s = roundDiv(sc.n, sc.d).toString().padStart(places + 1, '0');
+    return places ? `${s.slice(0, s.length - places)}.${s.slice(s.length - places)}` : s;
+}
+function exactText(a) {
+    let k = 0;
+    while ((a.n * 10n ** BigInt(k)) % a.d !== 0n) {
+        k++;
+        if (k > 400)
+            throw new Error('non-terminating');
+    }
+    const s = (a.n * 10n ** BigInt(k) / a.d).toString().padStart(k + 1, '0');
+    return k ? `${s.slice(0, s.length - k)}.${s.slice(s.length - k)}` : s;
+}
+export const DISPLAY_MODES = ['sci3', 'sig3', 'sig3trim', 'fixed1', 'fixed2', 'exact'];
+export function display(mode, value) {
+    if (!DISPLAY_MODES.includes(mode))
+        throw new Error(`unknown display mode: ${mode}`);
+    const r = value !== null && typeof value === 'object' && typeof value.num === 'string' && typeof value.den === 'string' && /^-?\d+$/.test(value.num) && /^\d+$/.test(value.den) && BigInt(value.den) > 0n
+        ? rat(BigInt(value.num), BigInt(value.den))
+        : parse(value);
+    if (!r)
+        throw new Error('display value is not plain decimal text');
+    const neg = r.n < 0n;
+    const a = neg ? rat(-r.n, r.d) : r;
+    let body;
+    let zero = false;
+    if (mode === 'fixed1' || mode === 'fixed2') {
+        body = fixed(a, mode === 'fixed1' ? 1 : 2);
+        zero = /^0(\.0+)?$/.test(body);
+    }
+    else if (mode === 'exact') {
+        body = exactText(a);
+        zero = a.n === 0n;
+    }
+    else if (a.n === 0n) {
+        return '0';
+    }
+    else {
+        const { m, e } = sig3Parts(a);
+        if (mode === 'sci3')
+            body = `${m[0]}.${m.slice(1)} × 10^${e}`;
+        else {
+            body = placeDigits(m, e);
+            if (mode === 'sig3trim' && body.includes('.'))
+                body = body.replace(/0+$/, '').replace(/\.$/, '');
+        }
+    }
+    return neg && !zero ? `-${body}` : body;
+}

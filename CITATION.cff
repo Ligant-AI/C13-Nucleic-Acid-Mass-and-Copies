@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+type: software
+title: Nucleic Acid Mass and Copies
+abstract: >-
+  Copy number from a mass, a concentration and volume, an A260 reading or an amount in moles of dsDNA, ssDNA or ssRNA, and mass or moles from copies, in your browser.
+authors:
+  - family-names: Modi
+    given-names: A.B.
+    affiliation: Ligant AI Incorporated
+version: v1.0.1
+license: Apache-2.0
+repository-code: https://github.com/Ligant-AI/C13-Nucleic-Acid-Mass-and-Copies
+url: https://benchtools.ligant.ai/nucleic-acid-mass-and-copies/
