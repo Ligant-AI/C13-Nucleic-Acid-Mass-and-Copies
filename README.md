@@ -36,4 +36,4 @@ If you use Nucleic Acid Mass and Copies in your work, please cite it. The citati
 
 Apache License 2.0, see [LICENSE](LICENSE). The bundled fonts (Inter, IBM Plex Mono) are under the SIL Open Font License 1.1.
 
-Nucleic Acid Mass and Copies v1.0.1. © Ligant AI Incorporated.
+Nucleic Acid Mass and Copies v1.0.2. © Ligant AI Incorporated.

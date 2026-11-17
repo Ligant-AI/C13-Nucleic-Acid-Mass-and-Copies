@@ -46,7 +46,7 @@ export function workingLines(result) {
             raw(call(callOf('amountFromConcentration')));
         }
         if (result.route === 'c') {
-            say(`A260 after dilution = A260 ${TIMES} dilution = ${used('a260').value} ${TIMES} ${used('dilution').value} = ${v.aNeat.display}.`);
+            say(`A260 of the undiluted sample = A260 ${TIMES} dilution = ${used('a260').value} ${TIMES} ${used('dilution').value} = ${v.aNeat.display}.`);
             say(`A260 concentration = ${v.aNeat.display} ${TIMES} ${used('factor').value} ug/mL per A260 = ${v.concentration.text}.`);
             say(`Mass in the aliquot = concentration ${TIMES} volume = ${v.concentration.text} ${TIMES} ${withUnit(used('volume'))} = ${v.aliquotMass.text}.`);
             raw(call(callOf('amountFromConcentration')));

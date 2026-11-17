@@ -4,7 +4,7 @@ export const CONFIG = Object.freeze({
     productLine: 'Ligant Bench Tools',
     publisher: 'Ligant',
     legalEntity: 'Ligant AI Incorporated',
-    version: '1.0.1',
+    version: '1.0.2',
     slug: 'nucleic-acid-mass-and-copies',
     publicBase: 'https://benchtools.ligant.ai/',
     repositoryUrl: 'https://github.com/Ligant-AI/C13-Nucleic-Acid-Mass-and-Copies',
